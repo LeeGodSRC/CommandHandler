@@ -1,9 +1,13 @@
 package org.imanity.commandhandler;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Server;
+import org.bukkit.command.CommandException;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.entity.Player;
+import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.util.StringUtil;
 import org.imanity.commandhandler.param.ParameterData;
 
@@ -127,6 +131,19 @@ final class CommandMap extends SimpleCommandMap {
 		} finally {
 			parameters.remove(player.getUniqueId());
 		}
+	}
+
+	@Override
+	public boolean dispatch(CommandSender sender, String commandLine) throws CommandException {
+		boolean b = super.dispatch(sender, commandLine);
+		if (sender instanceof ConsoleCommandSender) {
+			ServerCommandEvent event = new ServerCommandEvent(sender, commandLine);
+			Bukkit.getPluginManager().callEvent(event);
+			if (event.isCancelled()) return false;
+			return true;
+		}
+
+		return b;
 	}
 
 }
